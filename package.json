@@ -1,0 +1,12 @@
+{
+  "name": "finalProject",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ansonWang0125/FinalProject.git",
+  "author": "mglco <b09705044@ntu.edu.tw>",
+  "license": "MIT",
+  "scripts":{
+    "start": "cd frontend && yarn start",
+    "server": "cd backend && yarn server"
+  }
+}
