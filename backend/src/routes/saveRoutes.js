@@ -1,15 +1,15 @@
 import express from 'express'
-import ScoreCard from './models/player'
+import Player from '../models/player'
 
 const router = express.Router()
 
 router.post('/api/save-game', async (req, res) => {
     try {
-        const scoreCard = new ScoreCard({
+        const player = new Player({
             name: req.body.name,
-            points: req.body.points
+            points: req.body.point
         })
-        await scoreCard.save()
+        await player.save()
             .then(() => {
                 res.send({ message: 'game saved' })
             })
