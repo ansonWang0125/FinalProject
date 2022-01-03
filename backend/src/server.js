@@ -17,7 +17,7 @@ app.use(bodyParser.json())
 // define routes
 app.use('/', router)
 // define server
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 4000
 app.listen(port, () => {
     console.log(`Server is up on port ${port}.`)
 })
