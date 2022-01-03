@@ -5,8 +5,13 @@
   "repository": "https://github.com/ansonWang0125/FinalProject.git",
   "author": "mglco <b09705044@ntu.edu.tw>",
   "license": "MIT",
-  "scripts":{
+  "scripts": {
     "start": "cd frontend && yarn start",
     "server": "cd backend && yarn server"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "axios": "^0.24.0",
+    "styled-components": "^5.3.3"
   }
 }
