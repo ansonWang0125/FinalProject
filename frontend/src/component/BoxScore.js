@@ -9,24 +9,25 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Button, TextField } from "@mui/material";
 import { makeStyles } from "@material-ui/core";
+import axios from '../axios'
 
 const useStyles = makeStyles(() => ({
   plusButton: {
-    minWidth: "25px !important",
+    minWidth: "15px !important",
     height: "25px !important",
     color: "white !important",
-    backgroundColor: "blue !important",
+    backgroundColor: "mediumspringgreen !important",
     borderRadius: "50% !important",
   },
   minusButton: {
     minWidth: "25px !important",
     height: "25px !important",
     color: "white !important",
-    backgroundColor: "red !important",
+    backgroundColor: "mediumseagreen !important",
     borderRadius: "50% !important",
   },
   stats: {
-    fontSize: "25px",
+    fontSize: "20px",
   },
 }));
 
@@ -50,7 +51,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-export default function BoxScore({ playerNum }) {
+export default function BoxScore({ playerNum, team }) {
   const classes = useStyles();
   const [playerList, setPlayerList] = useState(
     Array.from({ length: Number(playerNum) }, () => {
@@ -61,19 +62,23 @@ export default function BoxScore({ playerNum }) {
         assists: 0,
         steals: 0,
         blocks: 0,
-        FGM: 0,
-        FGA: 0,
-        FGP: 0,
-        threePM: 0,
-        threePA: 0,
-        threePP: 0,
-        FTM: 0,
-        FTA: 0,
-        FTP: 0,
+        twoMade: 0,
+        twoMiss: 0,
+        FG: Number(0).toFixed(3),
+        threeMade: 0,
+        threeMiss: 0,
+        threePP: Number(0).toFixed(3),
+        FTMade: 0,
+        FTMiss: 0,
+        FTP: Number(0).toFixed(3),
         offenseRebounds: 0,
         defenseRebounds: 0,
         turnovers: 0,
         fouls: 0,
+        FGM: 0,
+        FGA: 0,
+        threePA: 0,
+        FTA: 0,
       };
     })
   );
@@ -81,532 +86,435 @@ export default function BoxScore({ playerNum }) {
   useEffect(() => {
     //
   }, [playerList]);
+  const stats = ['PTS', 'REB', 'AST', 'STL', 'BLK', '2Pmade', '2Pmiss', 'FG%', '3Pmade', '3Pmiss', '3P%', 'FTMade', 'FTMiss', 'FT%', 'TO', 'PF']
+  const updateFG = (player) => {
+    player.FGA = player.twoMade + player.twoMiss + player.threeMade + player.threeMiss;
+    player.FGM = player.twoMade + player.threeMade;
+    player.threePA = player.threeMade + player.threeMiss;
+    player.FTA = player.FTMade + player.FTMiss;
+    if (player.FGA === 0)
+      player.FG = Number(0).toFixed(3);
+    else
+      player.FG = Number(player.FGM / player.FGA).toFixed(3);
+    if (player.threePA === 0)
+      player.threePP = Number(0).toFixed(3);
+    else
+      player.threePP = Number(player.threeMade / player.threePA).toFixed(3);
+    if (player.FTA === 0)
+      player.FTP = Number(0).toFixed(3);
+    else
+      player.FTP = Number(player.FTMade / player.FTA).toFixed(3);
+
+  }
+
+  const handleSave = async () => {
+    const {
+      data: { message },
+    } = await axios.post('/api/save-game', {
+      playerList,
+      team
+    })
+  };
+
+  const handleGet = async () => {
+    const {
+      data: { message },
+    } = await axios.get('/api/get-game')
+    console.log(message)
+  }
 
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Players</StyledTableCell>
-            <StyledTableCell align="right">PTS</StyledTableCell>
-            <StyledTableCell align="right">REB</StyledTableCell>
-            <StyledTableCell align="right">AST</StyledTableCell>
-            <StyledTableCell align="right">STL</StyledTableCell>
-            <StyledTableCell align="right">BLK</StyledTableCell>
-            <StyledTableCell align="right">FGM</StyledTableCell>
-            <StyledTableCell align="right">FGA</StyledTableCell>
-            <StyledTableCell align="right">FT%</StyledTableCell>
-            <StyledTableCell align="right">3PM</StyledTableCell>
-            <StyledTableCell align="right">3PA</StyledTableCell>
-            <StyledTableCell align="right">3P%</StyledTableCell>
-            <StyledTableCell align="right">FTM</StyledTableCell>
-            <StyledTableCell align="right">FTA</StyledTableCell>
-            <StyledTableCell align="right">FT%</StyledTableCell>
-            <StyledTableCell align="right">OREB</StyledTableCell>
-            <StyledTableCell align="right">DREB</StyledTableCell>
-            <StyledTableCell align="right">TO</StyledTableCell>
-            <StyledTableCell align="right">PF</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {playerList.map((player, index) => (
-            <StyledTableRow key={index}>
-              <StyledTableCell component="th" scope="player">
-                <TextField
-                  id="playerNumber"
-                  value={player.name}
-                  style={{ width: "150px" }}
-                  onChange={(e) => {
-                    let newList = [...playerList]; // copying the old datas array
-                    newList[index].name = e.target.value; // replace e.target.value with whatever you want to change it to
-                    setPlayerList(newList);
-                  }}
-                />
-              </StyledTableCell>
-              <StyledTableCell align="auto">
-                <div>
-                  <div className={classes.stats}>{player.points}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
+    <>
+      <Button onClick={handleSave} style={{ position: 'absolute', right: '10px' }}>Save</Button>
+      <Button onClick={handleGet}>Get</Button>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 700 }} aria-label="customized table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Players</StyledTableCell>
+              {stats.map((e) => (<StyledTableCell align='right'>{e}</StyledTableCell>))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {playerList.map((player, index) => (
+              <StyledTableRow key={index}>
+                <StyledTableCell component="th" scope="player">
+                  <TextField
+                    id="playerNumber"
+                    value={player.name}
+                    style={{ width: "150px" }}
+                    onChange={(e) => {
                       let newList = [...playerList]; // copying the old datas array
-                      newList[index].points += 1; // replace e.target.value with whatever you want to change it to
+                      newList[index].name = e.target.value; // replace e.target.value with whatever you want to change it to
                       setPlayerList(newList);
                     }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].points) <= 0) {
+                  />
+                </StyledTableCell>
+                <StyledTableCell align="auto">
+                  <div>
+                    <div className={classes.stats}>{player.points}</div>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.rebounds}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].points = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].rebounds += 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      } else {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].points -= 1; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.rebounds}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].rebounds += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].rebounds) <= 0) {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].rebounds = 0; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
                         newList[index].rebounds -= 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.assists}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].assists += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].assists) <= 0) {
+                      }}
+                      disabled={playerList[index].rebounds === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.assists}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].assists = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].assists += 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
                         newList[index].assists -= 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.steals}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].steals += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].steals) <= 0) {
+                      }}
+                      disabled={playerList[index].assists === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.steals}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].steals = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].steals += 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
                         newList[index].steals -= 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.blocks}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].blocks += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].blocks) <= 0) {
+                      }}
+                      disabled={playerList[index].assists === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.blocks}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].blocks = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].blocks += 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
                         newList[index].blocks -= 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.FGM}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].FGM += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].FGM) <= 0) {
+                      }}
+                      disabled={playerList[index].blocks === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.twoMade}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FGM = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].twoMade += 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].points += 2;
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FGM -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].twoMade -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].points -= 2;
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.FGA}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].FGA += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].FGA) <= 0) {
+                      }}
+                      disabled={playerList[index].twoMade === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.twoMiss}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FGA = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].twoMiss += 1; // replace e.target.value with whatever you want to change it to  
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FGA -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].twoMiss -= 1; // replace e.target.value with whatever you want to change it to
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.FGP}</div>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.threePM}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].threePM += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].threePM) <= 0) {
+                      }}
+                      disabled={playerList[index].twoMiss === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.FG}</div>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.threeMade}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].threePM = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].threeMade += 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].points += 3;
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].threePM -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].threeMade -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].points -= 3;
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.threePA}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].threePA += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].threePA) <= 0) {
+                      }}
+                      disabled={playerList[index].threeMade === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.threeMiss}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].threePA = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].threeMiss += 1; // replace e.target.value with whatever you want to change it to
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].threePA -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].threeMiss -= 1; // replace e.target.value with whatever you want to change it to
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.threePP}</div>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.FTM}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].FTM += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].FTM) <= 0) {
+                      }}
+                      disabled={playerList[index].threeMiss === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.threePP}</div>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.FTMade}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FTM = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].FTMade += 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].points += 1;
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FTM -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].FTMade -= 1; // replace e.target.value with whatever you want to change it to    
+                        newList[index].points -= 1;
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.FTA}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].FTA += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].FTA) <= 0) {
+                      }}
+                      disabled={playerList[index].FTMade === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.FTMiss}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FTA = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].FTMiss += 1; // replace e.target.value with whatever you want to change it to
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].FTA -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].FTMiss -= 1; // replace e.target.value with whatever you want to change it to
+                        updateFG(newList[index]);
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.FTP}</div>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.offenseRebounds}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].offenseRebounds += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].offenseRebounds) <= 0) {
+                      }}
+                      disabled={playerList[index].FTMiss === 0}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.FTP}</div>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.turnovers}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].offenseRebounds = 0; // replace e.target.value with whatever you want to change it to
+                        newList[index].turnovers += 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      } else {
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
+                        if (Number(playerList[index].turnovers) <= 0) {
+                          let newList = [...playerList]; // copying the old datas array
+                          newList[index].turnovers = 0; // replace e.target.value with whatever you want to change it to
+                          setPlayerList(newList);
+                        } else {
+                          let newList = [...playerList]; // copying the old datas array
+                          newList[index].turnovers -= 1; // replace e.target.value with whatever you want to change it to
+                          setPlayerList(newList);
+                        }
+                      }}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  <div>
+                    <div className={classes.stats}>{player.fouls}</div>
+                    <Button
+                      className={classes.plusButton}
+                      onClick={(e) => {
                         let newList = [...playerList]; // copying the old datas array
-                        newList[index].offenseRebounds -= 1; // replace e.target.value with whatever you want to change it to
+                        newList[index].fouls += 1; // replace e.target.value with whatever you want to change it to
                         setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.defenseRebounds}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].defenseRebounds += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].defenseRebounds) <= 0) {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].defenseRebounds = 0; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      } else {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].defenseRebounds -= 1; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.turnovers}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].turnovers += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].turnovers) <= 0) {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].turnovers = 0; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      } else {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].turnovers -= 1; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-              <StyledTableCell align="right">
-                <div>
-                  <div className={classes.stats}>{player.fouls}</div>
-                  <Button
-                    className={classes.plusButton}
-                    onClick={(e) => {
-                      let newList = [...playerList]; // copying the old datas array
-                      newList[index].fouls += 1; // replace e.target.value with whatever you want to change it to
-                      setPlayerList(newList);
-                    }}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className={classes.minusButton}
-                    onClick={(e) => {
-                      if (Number(playerList[index].fouls) <= 0) {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].fouls = 0; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      } else {
-                        let newList = [...playerList]; // copying the old datas array
-                        newList[index].fouls -= 1; // replace e.target.value with whatever you want to change it to
-                        setPlayerList(newList);
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                      }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      className={classes.minusButton}
+                      onClick={(e) => {
+                        if (Number(playerList[index].fouls) <= 0) {
+                          let newList = [...playerList]; // copying the old datas array
+                          newList[index].fouls = 0; // replace e.target.value with whatever you want to change it to
+                          setPlayerList(newList);
+                        } else {
+                          let newList = [...playerList]; // copying the old datas array
+                          newList[index].fouls -= 1; // replace e.target.value with whatever you want to change it to
+                          setPlayerList(newList);
+                        }
+                      }}
+                    >
+                      -
+                    </Button>
+                  </div>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }

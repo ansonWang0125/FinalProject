@@ -11,6 +11,8 @@ import {
 } from "@material-ui/core";
 import AlignedText from "./AlignedText";
 import BoxScore from "./BoxScore";
+import axios from '../axios'
+import Card from './Card'
 
 const useStyles = makeStyles(() => ({
   deleteButton: {},
@@ -22,6 +24,8 @@ export default function Home() {
   const [players, setPlayers] = useState();
   const [disabled, setDisabled] = useState(true);
   const [create, setCreate] = useState(false);
+  const [view, setView] = useState(false)
+  const [history, setHistory] = useState([])
 
   // Create Dialog
   const [popUp, setPopUp] = useState(false);
@@ -52,7 +56,14 @@ export default function Home() {
   };
 
   // save stats
-  const handleClickSave = () => {};
+  const handleClickSave = () => { };
+
+  const handleGet = async () => {
+    const {
+      data: { message },
+    } = await axios.get('/api/get-game')
+    setHistory(message)
+  }
 
   useEffect(() => {
     if (isNaN(players) === true || players === "" || Number(players) <= 0) {
@@ -60,7 +71,11 @@ export default function Home() {
     } else {
       setDisabled(false);
     }
-  }, [players]);
+
+    handleGet()
+
+
+  }, [players, history]);
 
   return (
     <>
@@ -76,15 +91,18 @@ export default function Home() {
           >
             Create
           </Button>
+          <div>
+            <Card history={history} />
+          </div>
         </div>
       )}
       {create === true && (
         <div>
-          <div className="record">
+          {/* <div className="record">
             <h1>Start Recording your Game Stats !</h1>
-          </div>
-          <h2>{team}</h2>
-          <div>
+          </div> */}
+          <h2>台大資管 v.s. {team}</h2>
+          {/* <div>
             <Button
               style={{ textTransform: "none" }}
               className={classes.saveButton}
@@ -101,19 +119,19 @@ export default function Home() {
             >
               Delete
             </Button>
-          </div>
+          </div> */}
           <div>
-            <BoxScore playerNum={players} />
+            <BoxScore playerNum={players} team={team} />
           </div>
         </div>
       )}
       {/* Create dialog */}
       <Dialog open={popUp} keepMounted onClose={handleClosePopUp}>
         <DialogTitle>
-          <Typography variant="h4">Add Team</Typography>
+          <Typography variant="h4">Add Boxscore</Typography>
         </DialogTitle>
         <DialogContent>
-          <AlignedText text="Team Name" childrenType="field">
+          <AlignedText text="Opponent's Name" childrenType="field">
             <TextField
               id="title"
               value={team}

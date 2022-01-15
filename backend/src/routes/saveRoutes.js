@@ -1,15 +1,16 @@
 import express from 'express'
-import Player from '../models/player'
+import Game from '../models/game'
 
 const router = express.Router()
 
 router.post('/api/save-game', async (req, res) => {
     try {
-        const player = new Player({
-            name: req.body.name,
-            points: req.body.point
+        const newGame = new Game({
+            game: req.body.playerList,
+            opponent: req.body.team,
+            date: Date.now()
         })
-        await player.save()
+        await newGame.save()
             .then(() => {
                 res.send({ message: 'game saved' })
             })
@@ -17,6 +18,13 @@ router.post('/api/save-game', async (req, res) => {
     catch (e) {
         res.send({ message: 'Game saving error' })
     }
+})
+
+router.get('/api/get-game', async (req, res) => {
+    await Game.find()
+        .then((result) => { res.send({ message: result }) })
+
+        .catch((e) => { console.log(e) })
 })
 
 export default router
