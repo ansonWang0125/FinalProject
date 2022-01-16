@@ -8,22 +8,24 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Button, TextField } from "@mui/material";
-import { makeStyles } from "@material-ui/core";
+import { Dialog, makeStyles } from "@material-ui/core";
 import axios from '../axios'
+import Btn from './Btn'
+import PopDialog from "./Dialog";
 
 const useStyles = makeStyles(() => ({
   plusButton: {
     minWidth: "15px !important",
     height: "25px !important",
     color: "white !important",
-    backgroundColor: "mediumspringgreen !important",
+    backgroundColor: "turquoise !important",
     borderRadius: "50% !important",
   },
   minusButton: {
     minWidth: "25px !important",
     height: "25px !important",
     color: "white !important",
-    backgroundColor: "mediumseagreen !important",
+    backgroundColor: "deepskyblue !important",
     borderRadius: "50% !important",
   },
   stats: {
@@ -51,7 +53,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-export default function BoxScore({ playerNum, team }) {
+const BoxScore = ({ playerNum, team, setCreate }) => {
   const classes = useStyles();
   const [playerList, setPlayerList] = useState(
     Array.from({ length: Number(playerNum) }, () => {
@@ -107,26 +109,42 @@ export default function BoxScore({ playerNum, team }) {
 
   }
 
-  const handleSave = async () => {
+  const [popUpSave, setPopUpSave] = useState(false);
+  const [popUpDelete, setPopUpDelete] = useState(false);
+
+  const handleClosePopUpSave = () => {
+    setPopUpSave(false);
+  }
+
+  const handleSubmitSave = async () => {
     const {
       data: { message },
     } = await axios.post('/api/save-game', {
       playerList,
-      team
+      team,
+      us,
+      enemy
     })
+
+    setPopUpSave(false);
+    setCreate(false);
+  }
+
+  const handleClosePopUpDelete = () => {
+    setPopUpDelete(false);
   };
 
-  const handleGet = async () => {
-    const {
-      data: { message },
-    } = await axios.get('/api/get-game')
-    console.log(message)
-  }
+  const handleSubmitDelete = () => {
+    setPopUpDelete(false);
+    setCreate(false);
+  };
+
+  const [us, setUs] = useState(0)
+  const [enemy, setEnemy] = useState(0)
 
   return (
     <>
-      <Button onClick={handleSave} style={{ position: 'absolute', right: '10px' }}>Save</Button>
-      <Button onClick={handleGet}>Get</Button>
+      <Btn team={team} setPopUpSave={setPopUpSave} setPopUpDelete={setPopUpDelete} us={us} setUs={setUs} enemy={enemy} setEnemy={setEnemy} />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 700 }} aria-label="customized table">
           <TableHead>
@@ -515,6 +533,10 @@ export default function BoxScore({ playerNum, team }) {
           </TableBody>
         </Table>
       </TableContainer>
+      <PopDialog handleClosePopUpSave={handleClosePopUpSave} handleClosePopUpDelete={handleClosePopUpDelete}
+        handleSubmitSave={handleSubmitSave} handleSubmitDelete={handleSubmitDelete} popUpSave={popUpSave} popUpDelete={popUpDelete} />
     </>
   );
 }
+
+export default BoxScore

@@ -9,10 +9,13 @@ import {
   DialogActions,
   TextField,
 } from "@material-ui/core";
+import CreateIcon from '@mui/icons-material/Create';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import AlignedText from "./AlignedText";
 import BoxScore from "./BoxScore";
 import axios from '../axios'
-import Card from './Card'
+import AllCards from './AllCards'
+import OneCard from './OneCard'
 
 const useStyles = makeStyles(() => ({
   deleteButton: {},
@@ -24,10 +27,10 @@ export default function Home() {
   const [players, setPlayers] = useState();
   const [disabled, setDisabled] = useState(true);
   const [create, setCreate] = useState(false);
-  const [view, setView] = useState(false)
   const [history, setHistory] = useState([])
 
-  // Create Dialog
+  //Create Game
+
   const [popUp, setPopUp] = useState(false);
 
   const handleClickCreate = () => {
@@ -41,22 +44,6 @@ export default function Home() {
     setCreate(true);
   };
 
-  // Delete Dialog
-  const [popUpDelete, setPopUpDelete] = useState(false);
-  const handleClickDelete = () => {
-    setPopUpDelete(true);
-  };
-  const handleClosePopUpDelete = () => {
-    setPopUpDelete(false);
-  };
-
-  const handleSubmitDelete = () => {
-    // dispatch(deleteAnnouncement(authToken, announcementId));
-    // history.push('/admin/system/announcement');
-  };
-
-  // save stats
-  const handleClickSave = () => { };
 
   const handleGet = async () => {
     const {
@@ -74,57 +61,65 @@ export default function Home() {
 
     handleGet()
 
-
   }, [players, history]);
+
+
+  const [open, setOpen] = useState(false)
+  const [curHis, setCurHis] = useState([]);
+  const [popUpDeleteAll, setPopUpDeleteAll] = useState(false)
+
+  const handleClick = (e) => {
+    setOpen(true)
+    setCurHis(e)
+  }
+
+  const deleteAll = async () => {
+    setPopUpDeleteAll(false);
+    const {
+      data: { message },
+    } = await axios.delete('/api/delete-allGame')
+
+  }
 
   return (
     <>
-      {create === false && (
-        <div>
+      {create === false && open === false && (
+        <div >
           <div className="home">
-            <h1>Want to Create Game Stats?</h1>
+            <h1 style={{ margin: '1%' }}>Welcome to NTUIM's Stats Page!</h1>
           </div>
           <Button
-            style={{ textTransform: "none" }}
-            variant="outlined"
+            style={{ textTransform: "none", position: 'absolute', right: '10px', top: '5px', }}
+            size="large"
+            variant="contained"
             onClick={handleClickCreate}
+            color="primary"
+            endIcon={<CreateIcon />}
           >
-            Create
+            Create New Game
+          </Button>
+          <Button
+            style={{ textTransform: "none", position: 'absolute', left: '10px', top: '5px', }}
+            size="large"
+            variant="contained"
+            onClick={() => setPopUpDeleteAll(true)}
+            color="secondary"
+            startIcon={<DeleteSweepIcon />}
+          >
+            Delete All Game
           </Button>
           <div>
-            <Card history={history} />
+            <AllCards history={history} handleClick={handleClick} />
           </div>
         </div>
       )}
-      {create === true && (
-        <div>
-          {/* <div className="record">
-            <h1>Start Recording your Game Stats !</h1>
-          </div> */}
-          <h2>台大資管 v.s. {team}</h2>
-          {/* <div>
-            <Button
-              style={{ textTransform: "none" }}
-              className={classes.saveButton}
-              variant="contained"
-              onClick={handleClickSave}
-            >
-              Save
-            </Button>
-            <Button
-              style={{ textTransform: "none" }}
-              className={classes.deleteButton}
-              variant="contained"
-              onClick={handleClickDelete}
-            >
-              Delete
-            </Button>
-          </div> */}
+      {
+        create === true && open === false && (
           <div>
-            <BoxScore playerNum={players} team={team} />
+            <BoxScore playerNum={players} team={team} setCreate={setCreate} />
           </div>
-        </div>
-      )}
+        )
+      }
       {/* Create dialog */}
       <Dialog open={popUp} keepMounted onClose={handleClosePopUp}>
         <DialogTitle>
@@ -169,27 +164,22 @@ export default function Home() {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Delete dialog */}
-      <Dialog open={popUpDelete} keepMounted onClose={handleClosePopUpDelete}>
+      {/* Delete All Game */}
+      <Dialog open={popUpDeleteAll} keepMounted >
         <DialogTitle>
-          <Typography variant="h4">Delete Box Score</Typography>
+          <Typography variant="h4">Delete BoxScore</Typography>
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body1" color="secondary">
-            {team}
-          </Typography>
-        </DialogContent>
-        <DialogContent>
           <Typography variant="body2">
-            Once you delete an Box Score, there is no going back. Please be
-            certain.
+            Once you clicked, all games in the history will be deleted.
+            Are you sure to do that?
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button
             style={{ textTransform: "none" }}
             variant="contained"
-            onClick={handleClosePopUpDelete}
+            onClick={() => setPopUpDeleteAll(false)}
           >
             Cancel
           </Button>
@@ -197,12 +187,21 @@ export default function Home() {
             style={{ textTransform: "none" }}
             className={classes.deleteButton}
             variant="contained"
-            onClick={() => handleSubmitDelete()}
+            color="secondary"
+            // endIcon={<DeleteIcon />}
+            onClick={() => deleteAll()}
           >
             Delete
           </Button>
         </DialogActions>
       </Dialog>
+      {
+        create === false && open === true && (
+          <div>
+            <OneCard setOpen={setOpen} curHis={curHis} />
+          </div>
+        )
+      }
     </>
   );
 }

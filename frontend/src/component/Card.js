@@ -73,119 +73,117 @@ const Card = ({ history }) => {
     const handleClick = (e) => {
         setOpen(true)
         setCurHis(e)
-        console.log(e.opponent)
     }
 
     return (
         <>{open ? (
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell>Players</StyledTableCell>
-                            {stats.map((e) => (<StyledTableCell align='right'>{e}</StyledTableCell>))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {curHis.game.map((player) => (
-                            <>
-                                <StyledTableRow>
-                                    <StyledTableCell component="th" scope="player">
-                                        <TextField
-                                            id="playerNumber"
-                                            value={player.name}
-                                            style={{ width: "150px" }}
-                                        />
-                                    </StyledTableCell>
-                                    <StyledTableCell align="auto">
-                                        <div>
-                                            <div className={classes.stats}>{player.points}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.rebounds}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.assists}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.steals}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.blocks}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.FGM}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.FGA}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.FG}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.threeMade}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.threePA}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.threePP}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.FTMade}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.FTA}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.FTP}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.turnovers}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">
-                                        <div>
-                                            <div className={classes.stats}>{player.fouls}</div>
-                                        </div>
-                                    </StyledTableCell>
-                                </StyledTableRow>
-                            </>
-
-                        )
-                        )}
-
-                    </TableBody>
-                </Table>
-            </TableContainer>)
+            <>
+                <button onClick={() => setOpen(false)}>X</button>
+                <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell>Players</StyledTableCell>
+                                {stats.map((e) => (<StyledTableCell align='right'>{e}</StyledTableCell>))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {curHis.game.map((player) => (
+                                <>
+                                    <StyledTableRow>
+                                        <StyledTableCell component="th" scope="player">
+                                            <TextField
+                                                id="playerNumber"
+                                                value={player.name}
+                                                style={{ width: "150px" }}
+                                            />
+                                        </StyledTableCell>
+                                        <StyledTableCell align="auto">
+                                            <div>
+                                                <div className={classes.stats}>{player.points}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.rebounds}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.assists}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.steals}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.blocks}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.FGM}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.FGA}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.FG}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.threeMade}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.threePA}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.threePP}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.FTMade}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.FTA}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.FTP}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.turnovers}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <div>
+                                                <div className={classes.stats}>{player.fouls}</div>
+                                            </div>
+                                        </StyledTableCell>
+                                    </StyledTableRow>
+                                </>)
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer></>)
             :
             (<Wrapper>
                 {history.map((e) => (

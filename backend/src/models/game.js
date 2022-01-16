@@ -5,7 +5,9 @@ const Schema = mongoose.Schema;
 const GameSchema = new Schema({
     game: Array,
     opponent: String,
-    date: Date,
+    date: String,
+    us: Number,
+    enemy: Number,
 
     //FGM, FGA, 3PM, 3PA, FTM, FTA, TO, AST, REB, ST, BLK, PF, PTS
 })
